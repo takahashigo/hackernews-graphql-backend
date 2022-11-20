@@ -1,0 +1,49 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// データベースのテーブルの型定義,作成
+model Link {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  description String
+  url String
+  postedBy User? @relation(fields: [postedById],references: [id])
+  postedById Int?
+  votes Vote[]
+}
+// fieldsが外部キー(参照するためのコード,postedById）、referencesが主キー（一意に定まるの、参照される,,,,Userのid）、？は省略可能であることを示している、postedById=Userのid
+
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  links Link[]
+  votes Vote[]
+}
+
+
+model Vote {
+  id Int @id @default(autoincrement())
+  link Link @relation(fields: [linkId],references: [id])
+  linkId Int
+  user User @relation(fields: [userId],references: [id])
+  userId Int
+
+  @@unique([linkId,userId])
+}
+
+
+
+// データベースのモデルの変更後は、npx prisma migrate dev "コメント"から、npx prisma generateでclientでデータベースを使える状態にする
+
+
